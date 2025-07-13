@@ -21,27 +21,40 @@ public class ArticuloServiceImpl implements ArticuloService {
     }
 
     // Lista todos los artículos
+    @Override
     public List<Articulo> listarArticulos() {
         return articuloRepository.findAll();
     }
 
     // Obtiene un artículo por su ID
+    @Override
     public Optional<Articulo> obtenerArticuloPorId(Long id) {
         return articuloRepository.findById(id);
+        
+    }
+
+    // Método adicional para obtener un artículo por ID, lanzando excepción si no se encuentra
+    @Override
+    public Articulo obtenerPorId(Long id) {
+        return articuloRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Artículo no encontrado con ID: " + id));
     }
 
     // Guarda un nuevo artículo o actualiza uno existente
+    @Override
     public Articulo guardarArticulo(Articulo articulo) {
         return articuloRepository.save(articulo);
     }
 
     // Actualiza un artículo existente por su ID
+    @Override
     public Articulo actualizarArticulo(Long id, Articulo articulo) {
         articulo.setId(id);
         return articuloRepository.save(articulo);
     }
 
     // Elimina un artículo por su ID
+    @Override
     public void eliminarArticulo(Long id) {
         articuloRepository.deleteById(id);
     }
