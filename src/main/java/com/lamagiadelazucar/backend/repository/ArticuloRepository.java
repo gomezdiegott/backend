@@ -31,7 +31,7 @@ public interface ArticuloRepository extends JpaRepository<Articulo, Long> {
     List<Articulo> findByNombre(String nombre);
 
     // Buscar artículos cuyo nombre contenga una palabra (LIKE '%texto%')
-    List<Articulo> findByNombreContaining(String texto);
+    List<Articulo> findByNombreContainingIgnoreCase(String texto);
 
     // Buscar artículos con precio mayor a un valor dado
     List<Articulo> findByPrecioGreaterThan(Double precio);

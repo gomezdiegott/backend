@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lamagiadelazucar.backend.model.Articulo;
+import com.lamagiadelazucar.backend.repository.ArticuloRepository;
 import com.lamagiadelazucar.backend.service.ArticuloService;
 
 @CrossOrigin(origins = "*") // Permite solicitudes desde cualquier origen (CORS)
@@ -149,6 +150,15 @@ public class ArticuloController {
         System.out.println("Imagen URL en articulo: " + articulo.getImagenUrl());
 
         return ResponseEntity.ok(nombreArchivo);
+    }
+
+    // Método para buscar artículos por nombre
+    @Autowired
+    private ArticuloRepository articuloRepository;
+
+    @GetMapping("/buscar")
+    public List<Articulo> buscarPorNombre(@RequestParam String nombre) {
+        return articuloRepository.findByNombreContainingIgnoreCase(nombre);
     }
 
 }
