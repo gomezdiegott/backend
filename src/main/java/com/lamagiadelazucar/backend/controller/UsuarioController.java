@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lamagiadelazucar.backend.model.Usuario;
 import com.lamagiadelazucar.backend.service.UsuarioService;
+import com.lamagiadelazucar.backend.repository.UsuarioRepository;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -23,16 +25,43 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @PostMapping("/registro")
-    public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
-        Optional<Usuario> existente = usuarioService.buscarPorEmail(usuario.getEmail());
+    // @PostMapping("/registro")
+    // public ResponseEntity<?> registrar(@RequestBody Usuario usuario) {
+    //     Optional<Usuario> existente = usuarioService.buscarPorEmail(usuario.getEmail());
 
-        if (existente.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Ese correo ya está en uso.");
+    //     if (existente.isPresent()) {
+    //         return ResponseEntity.status(HttpStatus.CONFLICT).body("Ese correo ya está en uso.");
+    //     }
+
+    //     Usuario creado = usuarioService.registrar(usuario);
+    //     return ResponseEntity.ok(creado);
+    // }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+   @PostMapping("/registro")
+    public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario) {
+
+        
+
+        // Asignar rol por defecto si no viene especificado
+        if (usuario.getRol() == null) {
+            usuario.setRol("USER");
         }
-
-        Usuario creado = usuarioService.registrar(usuario);
-        return ResponseEntity.ok(creado);
+        
+        // Puedes añadir validaciones adicionales aquí
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            return ResponseEntity.badRequest().body("El email ya está registrado");
+        }
+        
+        // Encriptar la contraseña antes de guardar
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        
+        Usuario usuarioGuardado = usuarioRepository.save(usuario);
+        return ResponseEntity.ok(usuarioGuardado);
     }
 
 

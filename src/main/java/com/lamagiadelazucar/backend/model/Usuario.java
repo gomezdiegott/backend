@@ -1,5 +1,7 @@
 package com.lamagiadelazucar.backend.model;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,11 +24,14 @@ public class Usuario {
     private Long id;
 
     private String nombre;
+    private String apellido;
 
     @Column(unique = true)
     private String email;
 
     private String password;
-
     private String rol; // Puede ser "USER", "ADMIN", etc.
+
+    private LocalDate fechaNacimiento;
+    private String pais;
 }
