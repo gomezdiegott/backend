@@ -16,13 +16,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable()) // opcional: si ya usás @CrossOrigin
             .authorizeHttpRequests(auth -> auth
-                // ✅ Permitimos explícitamente acceso público a artículos e imágenes
-                .requestMatchers("/api/articulos/**", "/imagenes/**").permitAll()
-                // ✅ Permitimos login y registro
-                .requestMatchers("/usuarios/login", "/usuarios/registro").permitAll()
-                // ❌ Todo lo demás requiere login (más adelante)
+                .requestMatchers(
+                    "/api/articulos/**", 
+                    "/api/carrito/**",  // 💥 Agregamos el carrito
+                    "/imagenes/**", 
+                    "/usuarios/login", 
+                    "/usuarios/registro"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
+
             .formLogin(login -> login.disable())
             .httpBasic(basic -> basic.disable());
 

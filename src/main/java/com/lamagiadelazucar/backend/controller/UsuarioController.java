@@ -1,12 +1,11 @@
 package com.lamagiadelazucar.backend.controller;
 
-import java.util.HashMap;
-import java.util.Optional;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,15 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lamagiadelazucar.backend.dto.RegistroUsuarioDTO;
 import com.lamagiadelazucar.backend.dto.UsuarioResponseDTO;
 import com.lamagiadelazucar.backend.model.Usuario;
+import com.lamagiadelazucar.backend.repository.UsuarioRepository;
 import com.lamagiadelazucar.backend.service.UsuarioService;
 
 import jakarta.validation.Valid;
 
-import com.lamagiadelazucar.backend.repository.UsuarioRepository;
-
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*") // Cambialo si necesitás restringirlo luego
+@CrossOrigin(origins = "*") 
 public class UsuarioController {
 
     @Autowired
