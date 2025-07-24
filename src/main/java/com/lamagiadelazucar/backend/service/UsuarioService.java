@@ -19,5 +19,6 @@ public interface UsuarioService {
     List<Usuario> obtenerTodos();
     boolean existePorId(Long id);
     boolean existePorEmail(String email);
-
+    Usuario guardar(Usuario usuario);
+    void cambiarContrasena(String email, String actual, String nueva);
 }

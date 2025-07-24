@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.lamagiadelazucar.backend.model.Usuario;
@@ -15,11 +15,13 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public Usuario registrar(Usuario usuario) {
         // Encriptar la contraseña
-        String passwordEncriptada = new BCryptPasswordEncoder().encode(usuario.getPassword());
+        String passwordEncriptada = passwordEncoder.encode(usuario.getPassword());
         usuario.setPassword(passwordEncriptada);
 
         // Asignar rol por defecto si no viene (ej: "USER")
@@ -33,7 +35,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Optional<Usuario> login(String email, String password) {
         return usuarioRepository.findByEmail(email)
-                .filter(user -> new BCryptPasswordEncoder().matches(password, user.getPassword()));
+                .filter(user -> passwordEncoder.matches(password, user.getPassword()));
     }
 
     @Override
@@ -95,6 +97,28 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public boolean existePorEmail(String email) {
         return usuarioRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Usuario guardar(Usuario usuario) {
+        // Encriptar la contraseña si es nueva
+        if (usuario.getPassword() != null && !usuario.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    public void cambiarContrasena(String email, String actual, String nueva) {
+        Usuario user = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(actual, user.getPassword())) {
+            throw new RuntimeException("La contraseña actual no es correcta");
+        }
+
+        user.setPassword(passwordEncoder.encode(nueva));
+        usuarioRepository.save(user);
     }
 
 }

@@ -10,11 +10,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +29,7 @@ import com.lamagiadelazucar.backend.service.UsuarioService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("api/usuarios")
 @CrossOrigin(origins = "*") 
 public class UsuarioController {
 
@@ -107,7 +108,9 @@ public class UsuarioController {
         }
 
         Usuario user = userOpt.get();
-        boolean passwordCorrecta = new BCryptPasswordEncoder().matches(usuario.getPassword(), user.getPassword());
+
+        // ✅ Compara texto plano vs hash guardado
+        boolean passwordCorrecta = passwordEncoder.matches(usuario.getPassword(), user.getPassword());
 
         if (!passwordCorrecta) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Contraseña incorrecta.");
@@ -115,5 +118,46 @@ public class UsuarioController {
 
         return ResponseEntity.ok(user);
     }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody Usuario datosActualizados) {
+        Optional<Usuario> usuarioOpt = usuarioService.buscarPorId(id);
+
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 si no existe
+        }
+
+        Usuario usuarioExistente = usuarioOpt.get();
+
+        // Actualizamos solo campos permitidos
+        usuarioExistente.setNombre(datosActualizados.getNombre());
+        usuarioExistente.setApellido(datosActualizados.getApellido());
+
+        // Guardamos
+        Usuario actualizado = usuarioService.guardar(usuarioExistente);
+
+        return ResponseEntity.ok(actualizado); // 200 OK con el usuario actualizado
+    }
+
+    @PutMapping("/cambiar-contrasena")
+    public ResponseEntity<?> cambiarContrasena(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String actual = request.get("actual");
+        String nueva = request.get("nueva");
+
+        try {
+            usuarioService.cambiarContrasena(email, actual, nueva);
+            
+            // Obtener el usuario actualizado para devolverlo
+            Usuario usuarioActualizado = usuarioService.buscarPorEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado después de actualizar"));
+                
+            return ResponseEntity.ok(new UsuarioResponseDTO(usuarioActualizado));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 
 }
